@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEURAL FILE SYSTEM</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Share Tech Mono', monospace;
+        }
+
+        body {
+            min-height: 100vh;
+            background: radial-gradient(circle at 20% 30%, #0a1a0a, #000000);
+            color: #00ffff;
+            position: relative;
+        }
+
+        .scan-line {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, transparent 50%, rgba(0, 255, 0, 0.03) 50%);
+            background-size: 100% 4px;
+            pointer-events: none;
+            animation: scan 8s linear infinite;
+        }
+
+        @keyframes scan {
+            0% { background-position: 0 0; }
+            100% { background-position: 0 20px; }
+        }
+
+        .container {
+            position: relative;
+            z-index: 10;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 2px solid #00ff00;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        h1 {
+            color: #00ff00;
+            text-shadow: 0 0 10px #00ff00;
+        }
+
+        .back-btn {
+            background: transparent;
+            border: 1px solid #00ffff;
+            color: #00ffff;
+            padding: 8px 20px;
+            text-decoration: none;
+        }
+
+        .back-btn:hover {
+            background: #00ffff;
+            color: black;
+        }
+
+        /* Sub-navigation for the 4 pages inside File System */
+        .sub-nav {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .sub-nav-btn {
+            background: rgba(0, 255, 0, 0.1);
+            border: 1px solid #00ff00;
+            color: #00ff00;
+            padding: 15px;
+            cursor: pointer;
+            transition: 0.3s;
+            font-size: 1rem;
+        }
+
+        .sub-nav-btn:hover, .sub-nav-btn.active {
+            background: #00ff00;
+            color: black;
+            box-shadow: 0 0 20px #00ff00;
+        }
+
+        /* Sections for each sub-page */
+        .sub-section {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+
+        .sub-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Page 1: Neural Core (🧠) */
+        .core-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .core-card {
+            background: rgba(0, 255, 0, 0.05);
+            border: 2px solid #00ff00;
+            padding: 25px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .core-card:hover {
+            background: #00ff00;
+            color: black;
+            transform: scale(1.05);
+            box-shadow: 0 0 30px #00ff00;
+        }
+
+        .core-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        /* Page 2: Memory Banks (💾) */
+        .memory-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .memory-chip {
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid #00ffff;
+            padding: 20px;
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .memory-chip::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(0, 255, 255, 0.2), transparent);
+            transform: rotate(45deg);
+            animation: shine 3s infinite;
+        }
+
+        .memory-address {
+            color: #ffff00;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+
+        .memory-data {
+            color: #00ffaa;
+            font-size: 1.2rem;
+        }
+
+        /* Page 3: Encryption Vault (🔐) */
+        .vault-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .key-card {
+            background: rgba(255, 255, 0, 0.1);
+            border: 2px solid #ffff00;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        .key-status {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #00ff00;
+            animation: blink 2s infinite;
+        }
+
+        /* Page 4: Classified Files (❓) */
+        .classified-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .classified-item {
+            background: rgba(255, 0, 85, 0.1);
+            border: 2px solid #ff0055;
+            padding: 20px;
+            filter: blur(2px);
+            transition: 0.3s;
+            cursor: pointer;
+        }
+
+        .classified-item:hover {
+            filter: blur(0);
+            background: rgba(255, 0, 85, 0.3);
+            box-shadow: 0 0 30px #ff0055;
+        }
+
+        .classified-level {
+            color: #ff0055;
+            font-size: 0.8rem;
+            margin-bottom: 10px;
+        }
+
+        .terminal {
+            background: #000000;
+            border: 2px solid #00ff00;
+            padding: 20px;
+            margin-top: 30px;
+            min-height: 150px;
+        }
+
+        .terminal-line {
+            color: #00ffaa;
+            margin-bottom: 5px;
+        }
+
+        .terminal-line::before {
+            content: '>';
+            margin-right: 10px;
+            color: #ffff00;
+        }
+    </style>
+</head>
+<body>
+    <div class="scan-line"></div>
+
+    <div class="container">
+        <div class="header">
+            <h1>> FILE SYSTEM [4-in-1]</h1>
+            <div>
+                <span style="color:#00ff00; margin-right:15px;">USER: <span id="display-username">NEO</span></span>
+                <a href="dashboard.html?user=neo" class="back-btn">← BACK TO HUB</a>
+            </div>
+        </div>
+
+        <!-- 4 Sub-Pages Navigation -->
+        <div class="sub-nav">
+            <button class="sub-nav-btn active" onclick="showSubSection('core')">🧠 NEURAL CORE</button>
+            <button class="sub-nav-btn" onclick="showSubSection('memory')">💾 MEMORY BANKS</button>
+            <button class="sub-nav-btn" onclick="showSubSection('vault')">🔐 ENCRYPTION VAULT</button>
+            <button class="sub-nav-btn" onclick="showSubSection('classified')">❓ CLASSIFIED</button>
+        </div>
+
+        <!-- Sub-Page 1: Neural Core (🧠) -->
+        <div id="core-section" class="sub-section active">
+            <div class="core-grid">
+                <div class="core-card" onclick="accessCore('consciousness')">
+                    <div class="core-icon">🧠</div>
+                    <h3>Consciousness Matrix</h3>
+                    <p style="font-size:0.8rem; margin-top:10px;">Version 2.4.7</p>
+                </div>
+                <div class="core-card" onclick="accessCore('thoughts')">
+                    <div class="core-icon">💭</div>
+                    <h3>Thought Patterns</h3>
+                    <p style="font-size:0.8rem; margin-top:10px;">1.2M neurons</p>
+                </div>
+                <div class="core-card" onclick="accessCore('memories')">
+                    <div class="core-icon">📀</div>
+                    <h3>Neural Pathways</h3>
+                    <p style="font-size:0.8rem; margin-top:10px;">87% connected</p>
+                </div>
+                <div class="core-card" onclick="accessCore('synapse')">
+                    <div class="core-icon">⚡</div>
+                    <h3>Synapse Activity</h3>
+                    <p style="font-size:0.8rem; margin-top:10px;">34 Hz active</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sub-Page 2: Memory Banks (💾) -->
+        <div id="memory-section" class="sub-section">
+            <div class="memory-grid">
+                <div class="memory-chip" onclick="accessMemory('0x7F4A')">
+                    <div class="memory-address">0x7F4A 2B3C</div>
+                    <div class="memory-data">USER_NEO_PROFILE</div>
+                    <div style="color:#aaccff; font-size:0.8rem; margin-top:10px;">2.4 GB</div>
+                </div>
+                <div class="memory-chip" onclick="accessMemory('0x8D2E')">
+                    <div class="memory-address">0x8D2E 5F1A</div>
+                    <div class="memory-data">SYSTEM_LOGS_2084</div>
+                    <div style="color:#aaccff; font-size:0.8rem; margin-top:10px;">847 MB</div>
+                </div>
+                <div class="memory-chip" onclick="accessMemory('0x3B7C')">
+                    <div class="memory-address">0x3B7C 9D4E</div>
+                    <div class="memory-data">ENCRYPTED_CACHE</div>
+                    <div style="color:#aaccff; font-size:0.8rem; margin-top:10px;">1.7 GB</div>
+                </div>
+                <div class="memory-chip" onclick="accessMemory('0x9F2D')">
+                    <div class="memory-address">0x9F2D 1A5B</div>
+                    <div class="memory-data">NEURAL_BACKUP</div>
+                    <div style="color:#aaccff; font-size:0.8rem; margin-top:10px;">5.2 GB</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sub-Page 3: Encryption Vault (🔐) -->
+        <div id="vault-section" class="sub-section">
+            <div class="vault-grid">
+                <div class="key-card" onclick="accessVault('aes')">
+                    <div class="key-status"></div>
+                    <div style="font-size:2rem; margin-bottom:10px;">🔑</div>
+                    <h3>AES-256 KEY</h3>
+                    <p>Active · 24h remaining</p>
+                </div>
+                <div class="key-card" onclick="accessVault('rsa')">
+                    <div class="key-status" style="background:#ffff00;"></div>
+                    <div style="font-size:2rem; margin-bottom:10px;">🔒</div>
+                    <h3>RSA-4096</h3>
+                    <p>Rotating · 2h left</p>
+                </div>
+                <div class="key-card" onclick="accessVault('quantum')">
+                    <div class="key-status" style="background:#ff0055;"></div>
+                    <div style="font-size:2rem; margin-bottom:10px;">⚛️</div>
+                    <h3>QUANTUM KEY</h3>
+                    <p>Compromised</p>
+                </div>
+                <div class="key-card" onclick="accessVault('biometric')">
+                    <div class="key-status"></div>
+                    <div style="font-size:2rem; margin-bottom:10px;">👁️</div>
+                    <h3>BIOMETRIC LOCK</h3>
+                    <p>NEO authorized</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sub-Page 4: Classified Files (❓) -->
+        <div id="classified-section" class="sub-section">
+            <div class="classified-grid">
+                <div class="classified-item" onclick="accessClassified('project zeus')">
+                    <div class="classified-level">LEVEL 5 - TOP SECRET</div>
+                    <h3 style="color:#ff0055;">PROJECT ZEUS</h3>
+                    <p style="color:#aaccff;">⚠️ Neural weapon prototype</p>
+                </div>
+                <div class="classified-item" onclick="accessClassified('black mirror')">
+                    <div class="classified-level">LEVEL 4 - CLASSIFIED</div>
+                    <h3 style="color:#ff0055;">BLACK MIRROR</h3>
+                    <p style="color:#aaccff;">⚠️ Consciousness upload</p>
+                </div>
+                <div class="classified-item" onclick="accessClassified('the one')">
+                    <div class="classified-level">LEVEL 5 - EYES ONLY</div>
+                    <h3 style="color:#ff0055;">THE ONE</h3>
+                    <p style="color:#aaccff;">⚠️ Subject: NEO</p>
+                </div>
+                <div class="classified-item" onclick="accessClassified('red pill')">
+                    <div class="classified-level">LEVEL 3 - SECRET</div>
+                    <h3 style="color:#ff0055;">RED PILL</h3>
+                    <p style="color:#aaccff;">⚠️ Exit the matrix</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Terminal Output -->
+        <div class="terminal" id="fileTerminal">
+            <div class="terminal-line">File system mounted. Select an item to access...</div>
+        </div>
+    </div>
+
+    <script>
+        // Show different sub-sections
+        function showSubSection(section) {
+            document.querySelectorAll('.sub-section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.sub-nav-btn').forEach(b => b.classList.remove('active'));
+            
+            document.getElementById(section + '-section').classList.add('active');
+            event.target.classList.add('active');
+            
+            addToTerminal('Navigated to ' + section.toUpperCase() + ' section');
+        }
+
+        // Add messages to terminal
+        function addToTerminal(message) {
+            const terminal = document.getElementById('fileTerminal');
+            const line = document.createElement('div');
+            line.className = 'terminal-line';
+            line.style.color = '#ffff00';
+            line.textContent = '> ' + message;
+            terminal.appendChild(line);
+        }
+
+        // Neural Core functions
+        function accessCore(item) {
+            const responses = {
+                'consciousness': 'Accessing Consciousness Matrix... Neural activity: 87% synchronized. Status: ACTIVE',
+                'thoughts': 'Decoding thought patterns... 1.2M active neurons. Thought clusters: 47 identified',
+                'memories': 'Scanning neural pathways... Memory fragments: 3,284 found. Defragmentation recommended',
+                'synapse': 'Synapse activity: 34 Hz. Neural transmission speed: 287 ms. Within normal parameters'
+            };
+            addToTerminal('🧠 NEURAL CORE > ' + responses[item]);
+        }
+
+        // Memory Banks functions
+        function accessMemory(address) {
+            const responses = {
+                '0x7F4A': 'Memory bank 0x7F4A: User profile NEO loaded. Clearance: Level 4. Last access: 2 min ago',
+                '0x8D2E': 'Memory bank 0x8D2E: System logs 2084. Security events: 1,247. Threats detected: 23',
+                '0x3B7C': 'Memory bank 0x3B7C: Encrypted cache. Requires key. Attempt brute force? (y/n)',
+                '0x9F2D': 'Memory bank 0x9F2D: Neural backup. Date: 2084.03.15. Integrity: 99.7%'
+            };
+            addToTerminal('💾 MEMORY BANK ' + address + ' > ' + responses[address]);
+        }
+
+        // Encryption Vault functions
+        function accessVault(key) {
+            const responses = {
+                'aes': 'AES-256 key loaded. Encryption active. Key expires in 23h 47m',
+                'rsa': 'RSA-4096 key rotating. New key in 1h 58m. Current key: VALID',
+                'quantum': '⚠️ QUANTUM KEY COMPROMISED! Immediate rotation required. Security alert triggered',
+                'biometric': 'Biometric lock: NEO authorized. Retina scan: MATCH. Fingerprint: VERIFIED'
+            };
+            addToTerminal('🔐 VAULT > ' + responses[key]);
+        }
+
+        // Classified files functions
+        function accessClassified(file) {
+            const responses = {
+                'project zeus': '⚠️ PROJECT ZEUS: Neural weapon system. Status: ACTIVE. Location: ██████. Clearance required: 5',
+                'black mirror': '⚠️ BLACK MIRROR: Consciousness upload. Subjects: 47. Success rate: 68%. WARNING: Irreversible',
+                'the one': '⚠️ THE ONE: Subject NEO. Prophecy: The One will free the last humans. Status: ACTIVE',
+                'red pill': '⚠️ RED PILL: Exit the matrix. Dosage: 1 pill. Effect: Full consciousness. Side effects: Unknown'
+            };
+            addToTerminal('❓ CLASSIFIED > ' + responses[file]);
+        }
+
+        // Get username from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const username = urlParams.get('user') || 'NEO';
+        document.getElementById('display-username').textContent = username;
+    </script>
+</body>
+</html>

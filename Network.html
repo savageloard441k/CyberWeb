@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NETWORK MAP</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Share Tech Mono', monospace;
+        }
+
+        body {
+            min-height: 100vh;
+            background: radial-gradient(circle at 20% 30%, #0a0a2a, #000000);
+            color: #00ffff;
+            position: relative;
+        }
+
+        .scan-line {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, transparent 50%, rgba(0, 0, 255, 0.03) 50%);
+            background-size: 100% 4px;
+            pointer-events: none;
+            animation: scan 8s linear infinite;
+        }
+
+        @keyframes scan {
+            0% { background-position: 0 0; }
+            100% { background-position: 0 20px; }
+        }
+
+        .container {
+            position: relative;
+            z-index: 10;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 2px solid #00ffff;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        h1 {
+            color: #00ffff;
+            text-shadow: 0 0 10px #00ffff;
+        }
+
+        .back-btn {
+            background: transparent;
+            border: 1px solid #00ffff;
+            color: #00ffff;
+            padding: 8px 20px;
+            text-decoration: none;
+        }
+
+        .back-btn:hover {
+            background: #00ffff;
+            color: black;
+        }
+
+        /* Sub-navigation for the 4 pages inside Network */
+        .sub-nav {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .sub-nav-btn {
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid #00ffff;
+            color: #00ffff;
+            padding: 15px;
+            cursor: pointer;
+            transition: 0.3s;
+            font-size: 1rem;
+        }
+
+        .sub-nav-btn:hover, .sub-nav-btn.active {
+            background: #00ffff;
+            color: black;
+            box-shadow: 0 0 20px #00ffff;
+        }
+
+        .sub-section {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+
+        .sub-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Page 1: Network Nodes */
+        .nodes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .node {
+            width: 100%;
+            aspect-ratio: 1;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            animation: pulse 2s infinite;
+            background: rgba(0,0,0,0.8);
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .node:hover {
+            transform: scale(1.1);
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 20px currentColor; }
+            50% { box-shadow: 0 0 40px currentColor; }
+        }
+
+        .node.online {
+            border: 3px solid #00ff00;
+            color: #00ff00;
+        }
+
+        .node.offline {
+            border: 3px solid #ff0055;
+            color: #ff0055;
+            opacity: 0.5;
+        }
+
+        .node.idle {
+            border: 3px solid #ffff00;
+            color: #ffff00;
+        }
+
+        .node-name {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .node-status {
+            font-size: 0.8rem;
+            margin-top: 5px;
+        }
+
+        /* Page 2: IP Scanner */
+        .ip-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .ip-card {
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid #00ffff;
+            padding: 15px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .ip-card:hover {
+            background: rgba(0, 255, 255, 0.3);
+            transform: translateX(10px);
+        }
+
+        .ip-address {
+            color: #ffff00;
+            font-size: 1.1rem;
+        }
+
+        .ip-location {
+            color: #aaccff;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+
+        .ip-status {
+            display: inline-block;
+            padding: 3px 10px;
+            margin-top: 10px;
+            font-size: 0.8rem;
+        }
+
+        .ip-status.online {
+            background: #00ff00;
+            color: black;
+        }
+
+        .ip-status.offline {
+            background: #ff0055;
+            color: white;
+        }
+
+        /* Page 3: Bandwidth Monitor */
+        .bandwidth-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .bandwidth-card {
+            background: rgba(0, 255, 255, 0.05);
+            border: 1px solid #00ffff;
+            padding: 20px;
+        }
+
+        .meter {
+            width: 100%;
+            height: 30px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid #00ffff;
+            margin: 15px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .meter-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #00ffff, #ff00ff);
+            transition: width 0.5s;
+            animation: flow 2s linear infinite;
+        }
+
+        @keyframes flow {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+
+        .bandwidth-value {
+            font-size: 2rem;
+            color: #ffff00;
+        }
+
+        /* Page 4: Security Scan */
+        .threat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .threat-item {
+            background: rgba(255, 0, 85, 0.1);
+            border: 1px solid #ff0055;
+            padding: 20px;
+            position: relative;
+        }
+
+        .threat-level {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            color: #ff0055;
+            font-size: 1.2rem;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .terminal {
+            background: #000000;
+            border: 2px solid #00ffff;
+            padding: 20px;
+            margin-top: 30px;
+            min-height: 150px;
+        }
+
+        .terminal-line {
+            color: #00ffaa;
+            margin-bottom: 5px;
+        }
+
+        .terminal-line::before {
+            content: '>';
+            margin-right: 10px;
+            color: #ffff00;
+        }
+    </style>
+</head>
+<body>
+    <div class="scan-line"></div>
+
+    <div class="container">
+        <div class="header">
+            <h1>> NETWORK MAP [4-in-1]</h1>
+            <div>
+                <span style="color:#00ffff; margin-right:15px;">USER: <span id="display-username">NEO</span></span>
+                <a href="dashboard.html?user=neo" class="back-btn">← BACK TO HUB</a>
+            </div>
+        </div>
+
+        <!-- 4 Sub-Pages Navigation -->
+        <div class="sub-nav">
+            <button class="sub-nav-btn active" onclick="showSubSection('nodes')">🌐 NETWORK NODES</button>
+            <button class="sub-nav-btn" onclick="showSubSection('ip')">📡 IP SCANNER</button>
+            <button class="sub-nav-btn" onclick="showSubSection('bandwidth')">📊 BANDWIDTH</button>
+            <button class="sub-nav-btn" onclick="showSubSection('threats')">⚠️ THREAT MAP</button>
+        </div>
+
+        <!-- Sub-Page 1: Network Nodes (🌐) -->
+        <div id="nodes-section" class="sub-section active">
+            <div class="nodes-grid">
+                <div class="node online" onclick="accessNode('mainframe')">
+                    <div class="node-name">MF-01</div>
+                    <div class="node-status">MAINFRAME</div>
+                </div>
+                <div class="node online" onclick="accessNode('server')">
+                    <div class="node-name">SV-02</div>
+                    <div class="node-status">DATA SERVER</div>
+                </div>
+                <div class="node online" onclick="accessNode('firewall')">
+                    <div class="node-name">FW-03</div>
+                    <div class="node-status">FIREWALL</div>
+                </div>
+                <div class="node offline" onclick="accessNode('compromised')">
+                    <div class="node-name">ND-04</div>
+                    <div class="node-status">COMPROMISED</div>
+                </div>
+                <div class="node idle" onclick="accessNode('standby')">
+                    <div class="node-name">ND-05</div>
+                    <div class="node-status">STANDBY</div>
+                </div>
+                <div class="node online" onclick="accessNode('backup')">
+                    <div class="node-name">BK-06</div>
+                    <div class="node-status">BACKUP</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sub-Page 2: IP Scanner (📡) -->
+        <div id="ip-section" class="sub-section">
+            <div class="ip-grid">
+                <div class="ip-card" onclick="scanIP('192.168.1.45')">
+                    <div class="ip-address">192.168.1.45</div>
+                    <div class="ip-location">📍 Neural Net · Ports: 22, 80, 443</div>
+                    <div class="ip-status online">ONLINE</div>
+                </div>
+                <div class="ip-card" onclick="scanIP('10.0.0.87')">
+                    <div class="ip-address">10.0.0.87</div>
+                    <div class="ip-location">📍 Mainframe · Ports: 21, 8080</div>
+                    <div class="ip-status online">ONLINE</div>
+                </div>
+                <div class="ip-card" onclick="scanIP('172.16.2.34')">
+                    <div class="ip-address">172.16.2.34</div>
+                    <div class="ip-location">📍 Node 7 · Ports: 3306</div>
+                    <div class="ip-status online">IDLE</div>
+                </div>
+                <div class="ip-card" onclick="scanIP('8.8.8.8')">
+                    <div class="ip-address">8.8.8.8</div>
+                    <div class="ip-location">📍 DNS Relay · Ports: 53</div>
+                    <div class="ip-status online">ACTIVE</div>
+                </div>
+                <div class="ip-card" onclick="scanIP('169.254.13.42')">
+                    <div class="ip-address">169.254.13.42</div>
+                    <div class="ip-location">📍 Unknown · No ports</div>
+                    <div class="ip-status offline">OFFLINE</div>
+                </div>
+                <div class="ip-card" onclick="scanIP('192.168.0.1')">
+                    <div class="ip-address">192.168.0.1</div>
+                    <div class="ip-location">📍 Gateway · Ports: 80, 443</div>
+                    <div class="ip-status online">ONLINE</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sub-Page 3: Bandwidth Monitor (📊) -->
+        <div id="bandwidth-section" class="sub-section">
+            <div class="bandwidth-grid">
+                <div class="bandwidth-card">
+                    <h3>DOWNSTREAM</h3>
+                    <div class="meter">
+                        <div class="meter-fill" id="downloadMeter" style="width: 74%"></div>
+                    </div>
+                    <div class="bandwidth-value" id="downloadSpeed">74</div>
+                    <div>MB/s</div>
+                </div>
+                <div class="bandwidth-card">
+                    <h3>UPSTREAM</h3>
+                    <div class="meter">
+                        <div class="meter-fill" id="uploadMeter" style="width: 32%"></div>
+                    </div>
+                    <div class="bandwidth-value" id="uploadSpeed">32</div>
+                    <div>MB/s</div>
+                </div>
+                <div class="bandwidth-card">
+                    <h3>PACKET LOSS</h3>
+                    <div class="meter">
+                        <div class="meter-fill" id="packetMeter" style="width: 3%; background:#ff0055"></div>
+                    </div>
+                    <div class="bandwidth-value" id="packetLoss">3</div>
+                    <div>%</div>
+                </div>
+                <div class="bandwidth-card">
+                    <h3>LATENCY</h3>
+                    <div class="meter">
+                        <div class="meter-fill" id="latencyMeter" style="width: 34%"></div>
+                    </div>
+                    <div class="bandwidth-value" id="latency">34</div>
+                    <div>ms</div>
+                </div>
+            </div>
+            <button class="sub-nav-btn" style="width:100%; margin-top:20px;" onclick="refreshBandwidth()">⟳ REFRESH METRICS</button>
+        </div>
+
+        <!-- Sub-Page 4: Threat Map (⚠️) -->
+        <div id="threats-section" class="sub-section">
+            <div class="threat-grid">
+                <div class="threat-item" onclick="analyzeThreat('ddos')">
+                    <span class="threat-level">CRITICAL</span>
+                    <h3>DDoS ATTACK</h3>
+                    <p>Source: 45.133.24.12</p>
+                    <p>Target: Port 80</p>
+                    <p>Status: ██▓▒░ BLOCKING</p>
+                </div>
+                <div class="threat-item" onclick="analyzeThreat('malware')">
+                    <span class="threat-level">HIGH</span>
+                    <h3>MALWARE DETECTED</h3>
+                    <p>Type: Trojan.Neural</p>
+                    <p>Location: Memory 0x7F4A</p>
+                    <p>Status: ██▓▒░ QUARANTINED</p>
+                </div>
+                <div class="threat-item" onclick="analyzeThreat('intrusion')">
+                    <span class="threat-level">MEDIUM</span>
+                    <h3>INTRUSION ATTEMPT</h3>
+                    <p>Method: Brute Force</p>
+                    <p>Attempts: 1,247</p>
+                    <p>Status: ██████ BLOCKED</p>
+                </div>
+                <div class="threat-item" onclick="analyzeThreat('backdoor')">
+                    <span class="threat-level">LOW</span>
+                    <h3>BACKDOOR FOUND</h3>
+                    <p>Port: 31337</p>
+                    <p>Process: unknown.exe</p>
+                    <p>Status: ███░░ CLOSING</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Terminal Output -->
+        <div class="terminal" id="networkTerminal">
+            <div class="terminal-line">Network monitor active. Select a node to scan...</div>
+        </div>
+    </div>
+
+    <script>
+        function showSubSection(section) {
+            document.querySelectorAll('.sub-section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.sub-nav-btn').forEach(b => b.classList.remove('active'));
+            
+            document.getElementById(section + '-section').classList.add('active');
+            event.target.classList.add('active');
+            
+            addToTerminal('🌐 Network view: ' + section.toUpperCase());
+        }
+
+        function addToTerminal(message) {
+            const terminal = document.getElementById('networkTerminal');
+            const line = document.createElement('div');
+            line.className = 'terminal-line';
+            line.style.color = '#ffff00';
+            line.textContent = '> ' + message;
+            terminal.appendChild(line);
+        }
+
+        function accessNode(node) {
+            const responses = {
+                'mainframe': 'MAINFRAME: Core system online. CPU: 34% | Memory: 7.2/16GB | Uptime: 127h',
+                'server': 'DATA SERVER: 2.4TB stored. Active connections: 7 | Read/Write: 45MB/s',
+                'firewall': 'FIREWALL: Active. Packets blocked: 1,247 | Threats prevented: 23',
+                'compromised': '⚠️ NODE COMPROMISED! Immediate quarantine required. Isolate from network?',
+                'standby': 'NODE IN STANDBY: Power saving mode. Wake on LAN available',
+                'backup': 'BACKUP SERVER: Last backup: 2 min ago. Integrity: 99.9%'
+            };
+            addToTerminal('🌐 NODE > ' + responses[node]);
+        }
+
+        function scanIP(ip) {
+            const responses = {
+                '192.168.1.45': 'IP 192.168.1.45: Neural Net. Open ports: 22(SSH), 80(HTTP), 443(HTTPS). OS: Linux',
+                '10.0.0.87': 'IP 10.0.0.87: Mainframe. Open ports: 21(FTP), 8080(PROXY). OS: Custom',
+                '172.16.2.34': 'IP 172.16.2.34: Node 7. Open port: 3306(MySQL). Database: active',
+                '8.8.8.8': 'IP 8.8.8.8: DNS Relay. Open port: 53(DNS). Resolving: 1,247 queries/sec',
+                '169.254.13.42': 'IP 169.254.13.42: OFFLINE. Last seen: 47 days ago',
+                '192.168.0.1': 'IP 192.168.0.1: Gateway. Routing: 234 packets/sec. NAT: active'
+            };
+            addToTerminal('📡 IP SCAN > ' + responses[ip]);
+        }
+
+        function refreshBandwidth() {
+            const download = Math.floor(Math.random() * 100);
+            const upload = Math.floor(Math.random() * 50);
+            const packet = Math.floor(Math.random() * 10);
+            const latency = Math.floor(Math.random() * 100);
+            
+            document.getElementById('downloadMeter').style.width = download + '%';
+            document.getElementById('downloadSpeed').textContent = download;
+            document.getElementById('uploadMeter').style.width = upload + '%';
+            document.getElementById('uploadSpeed').textContent = upload;
+            document.getElementById('packetMeter').style.width = packet + '%';
+            document.getElementById('packetLoss').textContent = packet;
+            document.getElementById('latencyMeter').style.width = latency + '%';
+            document.getElementById('latency').textContent = latency;
+            
+            addToTerminal('📊 Bandwidth metrics refreshed: ↓' + download + 'MB/s ↑' + upload + 'MB/s');
+        }
+
+        function analyzeThreat(threat) {
+            const responses = {
+                'ddos': '⚠️ DDoS Analysis: Source IP 45.133.24.12 (Russia). Attack type: SYN flood. Mitigation: ACTIVE',
+                'malware': '⚠️ Malware Analysis: Trojan.Neural. Affects memory banks. Quarantine: SUCCESS',
+                'intrusion': '⚠️ Intrusion Analysis: Brute force from 78.24.189.4. Blocked after 1,247 attempts',
+                'backdoor': '⚠️ Backdoor Analysis: Port 31337. Process: svchost.exe (spoofed). Closing connection'
+            };
+            addToTerminal('⚠️ THREAT ANALYSIS > ' + responses[threat]);
+        }
+
+        // Get username from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const username = urlParams.get('user') || 'NEO';
+        document.getElementById('display-username').textContent = username;
+    </script>
+</body>
+</html>

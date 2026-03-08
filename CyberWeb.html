@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neural Login v1.0</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Share Tech Mono', monospace;
+        }
+
+        body {
+            min-height: 100vh;
+            background: radial-gradient(circle at 20% 30%, #0d0b1a, #010101);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* The famous scanline effect */
+        .scan-line {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, transparent 50%, rgba(0, 255, 255, 0.03) 50%);
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 1;
+            animation: scan 8s linear infinite;
+        }
+
+        @keyframes scan {
+            0% { background-position: 0 0; }
+            100% { background-position: 0 20px; }
+        }
+
+        .container {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            max-width: 400px;
+            padding: 20px;
+        }
+
+        .login-box {
+            background: rgba(10, 20, 30, 0.8);
+            backdrop-filter: blur(10px);
+            border: 2px solid #00ffff;
+            box-shadow: 0 0 30px #00ffff88, inset 0 0 20px #00ffff33;
+            padding: 40px 30px;
+            border-radius: 8px;
+            color: #00ffff;
+        }
+
+        .glitch-container {
+            margin-bottom: 20px;
+        }
+
+        .glitch {
+            font-size: 2.2rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            position: relative;
+            text-shadow: 0.05em 0 0 #ff00ff, -0.05em -0.025em 0 #00ffff;
+            animation: glitch-shake 0.3s infinite alternate;
+            letter-spacing: 3px;
+        }
+
+        @keyframes glitch-shake {
+            0% { transform: translate(0); }
+            20% { transform: translate(-2px, 1px); }
+            40% { transform: translate(2px, -1px); }
+            60% { transform: translate(-1px, 0); }
+            80% { transform: translate(1px, 0); }
+            100% { transform: translate(0); }
+        }
+
+        .subtitle {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #aaccff;
+            border-bottom: 1px dashed #00ffff;
+            padding-bottom: 10px;
+        }
+
+        .message-area {
+            margin-bottom: 20px;
+            padding: 10px;
+            text-align: center;
+            border: 1px solid transparent;
+            transition: 0.3s;
+            min-height: 50px;
+        }
+
+        .message-area.success {
+            border-color: #00ffaa;
+            color: #00ffaa;
+            box-shadow: 0 0 10px #00ffaa;
+        }
+
+        .message-area.error {
+            border-color: #ff0055;
+            color: #ff0055;
+            box-shadow: 0 0 10px #ff0055;
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            letter-spacing: 2px;
+            font-size: 0.9rem;
+        }
+
+        .input-group input {
+            width: 100%;
+            background: transparent;
+            border: 1px solid #00ffff;
+            padding: 12px 15px;
+            color: #00ffff;
+            outline: none;
+            font-size: 1rem;
+            transition: 0.3s;
+        }
+
+        .input-group input:focus {
+            box-shadow: 0 0 20px #00ffff;
+            border-color: #ffffff;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 14px;
+            background: transparent;
+            border: 2px solid #00ffff;
+            color: #00ffff;
+            font-size: 1.3rem;
+            font-weight: bold;
+            letter-spacing: 4px;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-bottom: 20px;
+        }
+
+        .login-btn:hover {
+            background: #00ffff;
+            color: #000000;
+            box-shadow: 0 0 40px #00ffff;
+        }
+
+        .signup-link {
+            text-align: center;
+            color: #aaccff;
+        }
+
+        .signup-link a {
+            color: #ffff00;
+            text-decoration: none;
+            border-bottom: 1px dashed #ffff00;
+        }
+
+        .signup-link a:hover {
+            text-shadow: 0 0 10px #ffff00;
+        }
+    </style>
+</head>
+<body>
+    <div class="scan-line"></div>
+    <div class="container">
+        <div class="login-box">
+            <div class="glitch-container">
+                <h1 class="glitch" data-text="CYBER_ACCESS">CYBER_ACCESS</h1>
+            </div>
+            <p class="subtitle">Enter credentials to access the mainframe</p>
+
+            <!-- This is where we will show error/success messages -->
+            <div id="message-area" class="message-area"></div>
+
+            <!-- Our login form -->
+            <form id="login-form">
+                <div class="input-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" placeholder="neo123" required>
+                </div>
+                <div class="input-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="login-btn">LOGIN</button>
+            </form>
+            <p class="signup-link">Need an ID? <a href="#" id="show-signup">Apply for access</a></p>
+        </div>
+    </div>
+
+    <script>
+        // Wait for the HTML page to fully load before running the script
+        document.addEventListener('DOMContentLoaded', function() {
+
+            // --- Our "Database" (Stored in memory) ---
+            const usersDatabase = [
+                { username: 'neo', password: '123' },
+                { username: 'morpheus', password: 'redpill' },
+                { username: 'trinity', password: 'tank' }
+            ];
+
+            // --- Get references to HTML elements ---
+            const loginForm = document.getElementById('login-form');
+            const messageArea = document.getElementById('message-area');
+            const usernameInput = document.getElementById('username');
+            const passwordInput = document.getElementById('password');
+            const signupLink = document.getElementById('show-signup');
+
+            // --- Function to display messages ---
+            function showMessage(text, type) {
+                messageArea.textContent = text;
+                messageArea.className = 'message-area ' + type; // Adds 'success' or 'error' class
+            }
+
+            // --- Handle the Login Form Submission ---
+            loginForm.addEventListener('submit', function(event) {
+                // Prevent the page from refreshing
+                event.preventDefault();
+
+                // Get the values typed by the user
+                const enteredUsername = usernameInput.value;
+                const enteredPassword = passwordInput.value;
+
+                // Simple validation
+                if (!enteredUsername || !enteredPassword) {
+                    showMessage('❌ ACCESS DENIED: Missing credentials.', 'error');
+                    return;
+                }
+
+                // Check if the user exists in our "database"
+                const foundUser = usersDatabase.find(user => user.username === enteredUsername && user.password === enteredPassword);
+
+                if (foundUser) {
+                    // Login Successful!
+                    showMessage('✅ ACCESS GRANTED. Welcome back, ' + foundUser.username + '.', 'success');
+                    document.querySelector('.login-btn').textContent = 'CONNECTED';
+                    
+                    // Redirect to dashboard after 1 second
+                    setTimeout(function() {
+                        window.location.href = 'dashboard.html?user=' + foundUser.username;
+                    }, 1000);
+                } else {
+                    // Login Failed
+                    showMessage('❌ ACCESS DENIED: Invalid username or password.', 'error');
+                }
+            });
+
+            // --- A little easter egg ---
+            signupLink.addEventListener('click', function(event) {
+                event.preventDefault();
+                showMessage('🔧 Neural link not yet established. Check back in Version 2.0', 'error');
+            });
+
+            // Clear the message when the user starts typing again
+            usernameInput.addEventListener('focus', () => showMessage('', ''));
+            passwordInput.addEventListener('focus', () => showMessage('', ''));
+
+        });
+    </script>
+</body>
+</html>

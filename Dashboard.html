@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MAINFRAME DASHBOARD</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Share Tech Mono', monospace;
+        }
+
+        body {
+            min-height: 100vh;
+            background: radial-gradient(circle at 20% 30%, #0a0a1f, #000000);
+            color: #00ffff;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        .scan-line {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, transparent 50%, rgba(0, 255, 255, 0.03) 50%);
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 999;
+            animation: scan 8s linear infinite;
+        }
+
+        @keyframes scan {
+            0% { background-position: 0 0; }
+            100% { background-position: 0 20px; }
+        }
+
+        .dashboard {
+            position: relative;
+            z-index: 10;
+            padding: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 2px solid #00ffff;
+            margin-bottom: 30px;
+            box-shadow: 0 0 20px #00ffff33;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .glitch {
+            font-size: 2rem;
+            text-shadow: 2px 0 #ff00ff, -2px 0 #00ffff;
+            animation: glitch 3s infinite;
+            letter-spacing: 4px;
+        }
+
+        @keyframes glitch {
+            0%, 100% { transform: skew(0deg); }
+            5% { transform: skew(2deg); text-shadow: 3px 0 #ff00ff, -3px 0 #00ffff; }
+            10% { transform: skew(-2deg); }
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        #display-username {
+            color: #ffff00;
+            text-shadow: 0 0 10px #ffff00;
+        }
+
+        .logout-btn {
+            background: transparent;
+            border: 1px solid #ff0055;
+            color: #ff0055;
+            padding: 8px 20px;
+            cursor: pointer;
+            transition: 0.3s;
+            text-decoration: none;
+        }
+
+        .logout-btn:hover {
+            background: #ff0055;
+            color: black;
+            box-shadow: 0 0 20px #ff0055;
+        }
+
+        /* Navigation Cards - THE 5 BUTTONS */
+        .nav-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .nav-card {
+            background: rgba(0, 255, 255, 0.05);
+            border: 2px solid #00ffff;
+            padding: 30px 20px;
+            text-align: center;
+            text-decoration: none;
+            color: #00ffff;
+            transition: 0.3s;
+            border-radius: 5px;
+            backdrop-filter: blur(5px);
+        }
+
+        .nav-card:hover {
+            background: #00ffff;
+            color: black;
+            box-shadow: 0 0 40px #00ffff;
+            transform: scale(1.05);
+        }
+
+        .nav-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        .nav-title {
+            font-size: 1.3rem;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+        }
+
+        .nav-desc {
+            font-size: 0.8rem;
+            color: #aaccff;
+        }
+
+        .nav-card:hover .nav-desc {
+            color: black;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: rgba(0, 255, 255, 0.05);
+            border: 1px solid #00ffff;
+            padding: 20px;
+            border-radius: 5px;
+        }
+
+        .stat-title {
+            color: #aaccff;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            color: #ffff00;
+        }
+
+        .stat-unit {
+            font-size: 1rem;
+            color: #00ffff;
+        }
+
+        /* Activity Panel */
+        .panel {
+            background: rgba(0, 20, 40, 0.7);
+            border: 1px solid #00ffff;
+            border-radius: 5px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .panel-title {
+            color: #ffff00;
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            border-bottom: 1px dashed #00ffff;
+            padding-bottom: 10px;
+        }
+
+        .activity-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(0, 255, 255, 0.2);
+            color: #aaccff;
+        }
+
+        .activity-time {
+            color: #00ffff;
+        }
+
+        .terminal {
+            background: #000000;
+            border: 2px solid #00ffff;
+            padding: 20px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+
+        .terminal-line {
+            color: #00ffaa;
+            margin-bottom: 5px;
+        }
+
+        .terminal-line::before {
+            content: '>';
+            margin-right: 10px;
+            color: #ffff00;
+        }
+    </style>
+</head>
+<body>
+    <div class="scan-line"></div>
+
+    <div class="dashboard">
+        <div class="header">
+            <h1 class="glitch">MAINFRAME HUB</h1>
+            <div class="user-info">
+                <span>USER: <span id="display-username">NEO</span></span>
+                <a href="index.html" class="logout-btn">> LOGOUT</a>
+            </div>
+        </div>
+
+        <!-- THE 5 NAVIGATION CARDS -->
+        <div class="nav-grid">
+            <a href="filesystem.html?user=neo" class="nav-card">
+                <div class="nav-icon">📁</div>
+                <div class="nav-title">FILE SYSTEM</div>
+                <div class="nav-desc">Access neural data files</div>
+            </a>
+            <a href="network.html?user=neo" class="nav-card">
+                <div class="nav-icon">🌐</div>
+                <div class="nav-title">NETWORK MAP</div>
+                <div class="nav-desc">View active nodes</div>
+            </a>
+            <a href="terminal.html?user=neo" class="nav-card">
+                <div class="nav-icon">💻</div>
+                <div class="nav-title">TERMINAL</div>
+                <div class="nav-desc">Advanced command line</div>
+            </a>
+            <a href="security.html?user=neo" class="nav-card">
+                <div class="nav-icon">⚠️</div>
+                <div class="nav-title">SECURITY</div>
+                <div class="nav-desc">Run scans & protocols</div>
+            </a>
+            <a href="dashboard.html?user=neo" class="nav-card" style="border-color: #ffff00;">
+                <div class="nav-icon">🏠</div>
+                <div class="nav-title">MAIN HUB</div>
+                <div class="nav-desc">Return to dashboard</div>
+            </a>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-title">SYSTEM UPTIME</div>
+                <div class="stat-value">127 <span class="stat-unit">HRS</span></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">DATA PROCESSED</div>
+                <div class="stat-value">2.4 <span class="stat-unit">TB</span></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">ACTIVE NODES</div>
+                <div class="stat-value">7 <span class="stat-unit">/ 12</span></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">SECURITY LEVEL</div>
+                <div class="stat-value">ALPHA <span class="stat-unit">MAX</span></div>
+            </div>
+        </div>
+
+        <!-- Activity Log -->
+        <div class="panel">
+            <h2 class="panel-title">> RECENT ACTIVITY LOG</h2>
+            <div class="activity-item">
+                <span>System breach attempt detected</span>
+                <span class="activity-time">12:47</span>
+            </div>
+            <div class="activity-item">
+                <span>Firewall updated <span style="color:#00ffaa">(SUCCESS)</span></span>
+                <span class="activity-time">11:23</span>
+            </div>
+            <div class="activity-item">
+                <span>User <span style="color:#ffff00">NEO</span> authenticated</span>
+                <span class="activity-time">10:15</span>
+            </div>
+            <div class="activity-item">
+                <span>Data packet intercepted</span>
+                <span class="activity-time">09:47</span>
+            </div>
+            <div class="activity-item">
+                <span>Neural link established</span>
+                <span class="activity-time">08:02</span>
+            </div>
+        </div>
+
+        <!-- Terminal Preview -->
+        <div class="terminal">
+            <div class="terminal-line">System initialized at 08:00:00</div>
+            <div class="terminal-line">Firewall status: ACTIVE</div>
+            <div class="terminal-line">Neural link: ESTABLISHED</div>
+            <div class="terminal-line">Last login: <span id="login-time"></span></div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get username from URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const username = urlParams.get('user') || 'NEO';
+            
+            // Display username
+            document.getElementById('display-username').textContent = username.toUpperCase();
+            
+            // Set login time
+            const now = new Date();
+            const timeString = now.toLocaleTimeString();
+            document.getElementById('login-time').textContent = timeString;
+        });
+    </script>
+</body>
+</html>

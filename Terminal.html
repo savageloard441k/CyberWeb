@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ADVANCED TERMINAL</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Share Tech Mono', monospace;
+        }
+
+        body {
+            min-height: 100vh;
+            background: #000000;
+            color: #00ff00;
+            position: relative;
+        }
+
+        .scan-line {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, transparent 50%, rgba(0, 255, 0, 0.03) 50%);
+            background-size: 100% 4px;
+            pointer-events: none;
+            animation: scan 8s linear infinite;
+        }
+
+        @keyframes scan {
+            0% { background-position: 0 0; }
+            100% { background-position: 0 20px; }
+        }
+
+        .container {
+            position: relative;
+            z-index: 10;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 2px solid #00ff00;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        h1 {
+            color: #00ff00;
+            text-shadow: 0 0 10px #00ff00;
+        }
+
+        .back-btn {
+            background: transparent;
+            border: 1px solid #00ff00;
+            color: #00ff00;
+            padding: 8px 20px;
+            text-decoration: none;
+        }
+
+        .back-btn:hover {
+            background: #00ff00;
+            color: black;
+        }
+
+        /* Sub-navigation for the 4 terminals */
+        .sub-nav {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .sub-nav-btn {
+            background: rgba(0, 255, 0, 0.1);
+            border: 1px solid #00ff00;
+            color: #00ff00;
+            padding: 15px;
+            cursor: pointer;
+            transition: 0.3s;
+            font-size: 1rem;
+        }
+
+        .sub-nav-btn:hover, .sub-nav-btn.active {
+            background: #00ff00;
+            color: black;
+            box-shadow: 0 0 20px #00ff00;
+        }
+
+        .sub-section {
+            display: none;
+            animation: fadeIn 0.5s;
+            flex: 1;
+            display: none;
+            flex-direction: column;
+        }
+
+        .sub-section.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Terminal Windows */
+        .terminal-window {
+            flex: 1;
+            background: #0a0a0a;
+            border: 2px solid #00ff00;
+            padding: 20px;
+            overflow-y: auto;
+            font-size: 1rem;
+            margin-bottom: 20px;
+            min-height: 400px;
+        }
+
+        .terminal-line {
+            color: #00ff00;
+            margin-bottom: 8px;
+            word-wrap: break-word;
+            font-family: 'Share Tech Mono', monospace;
+        }
+
+        .terminal-line.error {
+            color: #ff0055;
+        }
+
+        .terminal-line.success {
+            color: #ffff00;
+        }
+
+        .terminal-line.system {
+            color: #00ffff;
+        }
+
+        .terminal-input-area {
+            display: flex;
+            margin-top: 10px;
+            border-top: 1px solid #00ff00;
+            padding-top: 20px;
+        }
+
+        .prompt {
+            color: #ffff00;
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+
+        #commandInput {
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid #00ff00;
+            color: #00ff00;
+            width: 100%;
+            font-size: 1.2rem;
+            outline: none;
+        }
+
+        #commandInput:focus {
+            border-bottom-color: #ffff00;
+        }
+
+        /* Matrix Effect */
+        .matrix-rain {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.1;
+        }
+
+        /* Command Grid */
+        .command-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .command-card {
+            background: rgba(0, 255, 0, 0.1);
+            border: 1px solid #00ff00;
+            padding: 15px;
+            cursor: pointer;
+            transition: 0.3s;
+            text-align: center;
+        }
+
+        .command-card:hover {
+            background: #00ff00;
+            color: black;
+            transform: scale(1.05);
+        }
+
+        .command-key {
+            font-size: 1.2rem;
+            color: #ffff00;
+        }
+
+        .command-desc {
+            font-size: 0.8rem;
+            margin-top: 5px;
+        }
+
+        /* Hack Tools */
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .tool-card {
+            background: rgba(255, 0, 85, 0.1);
+            border: 2px solid #ff0055;
+            padding: 20px;
+            cursor: pointer;
+            transition: 0.3s;
+            text-align: center;
+        }
+
+        .tool-card:hover {
+            background: #ff0055;
+            color: black;
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px #ff0055;
+        }
+
+        .tool-icon {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: rgba(0, 255, 0, 0.1);
+            border: 1px solid #00ff00;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #00ff00, #ffff00);
+            transition: width 0.3s;
+        }
+    </style>
+</head>
+<body>
+    <div class="scan-line"></div>
+    <div class="matrix-rain" id="matrixRain"></div>
+
+    <div class="container">
+        <div class="header">
+            <h1>> TERMINAL [4-in-1]</h1>
+            <div>
+                <span style="color:#00ff00; margin-right:15px;">USER: <span id="display-username">NEO</span></span>
+                <a href="dashboard.html?user=neo" class="back-btn">← BACK TO HUB</a>
+            </div>
+        </div>
+
+        <!-- 4 Sub-Pages Navigation -->
+        <div class="sub-nav">
+            <button class="sub-nav-btn active" onclick="showSubSection('basic')">💻 BASIC TERMINAL</button>
+            <button class="sub-nav-btn" onclick="showSubSection('hack')">⚡ HACK TOOLS</button>
+            <button class="sub-nav-btn" onclick="showSubSection('matrix')">🌧️ MATRIX MODE</button>
+            <button class="sub-nav-btn" onclick="showSubSection('commands')">📚 COMMAND LIBRARY</button>
+        </div>
+
+        <!-- Sub-Page 1: Basic Terminal (💻) -->
+        <div id="basic-section" class="sub-section active">
+            <div class="terminal-window" id="basicTerminal">
+                <div class="terminal-line system">================================</div>
+                <div class="terminal-line system">NEURAL TERMINAL v2.0 - BASIC MODE</div>
+                <div class="terminal-line system">================================</div>
+                <div class="terminal-line">System initialized at 08:00:00</div>
+                <div class="terminal-line">Firewall status: ACTIVE</div>
+                <div class="terminal-line">Neural link: ESTABLISHED</div>
+                <div class="terminal-line">Type 'help' for available commands</div>
+                <div class="terminal-line" id="basicOutput"></div>
+            </div>
+            <div class="terminal-input-area">
+                <span class="prompt">root@mainframe:~$</span>
+                <input type="text" id="basicInput" placeholder="Enter command..." autofocus>
+            </div>
+        </div>
+
+        <!-- Sub-Page 2: Hack Tools (⚡) -->
+        <div id="hack-section" class="sub-section">
+            <div class="terminal-window" id="hackTerminal">
+                <div class="terminal-line system" style="color:#ff0055;">================================</div>
+                <div class="terminal-line system" style="color:#ff0055;">HACK TOOLS v3.0 - USE WITH CAUTION</div>
+                <div class="terminal-line system" style="color:#ff0055;">================================</div>
+                <div class="terminal-line">Select a tool below or type commands</div>
+                <div class="terminal-line" id="hackOutput"></div>
+            </div>
+            
+            <div class="tools-grid">
+                <div class="tool-card" onclick="runHackTool('nmap')">
+                    <div class="tool-icon">🔍</div>
+                    <h3>NMAP SCAN</h3>
+                    <p>Network mapper</p>
+                </div>
+                <div class="tool-card" onclick="runHackTool('crack')">
+                    <div class="tool-icon">🔓</div>
+                    <h3>PASSWORD CRACKER</h3>
+                    <p>Brute force attack</p>
+                </div>
+                <div class="tool-card" onclick="runHackTool('exploit')">
+                    <div class="tool-icon">💥</div>
+                    <h3>EXPLOIT DB</h3>
+                    <p>Vulnerability scanner</p>
+                </div>
+                <div class="tool-card" onclick="runHackTool('sniff')">
+                    <div class="tool-icon">👁️</div>
+                    <h3>PACKET SNIFFER</h3>
+                    <p>Traffic analyzer</p>
+                </div>
+            </div>
+            
+            <div class="terminal-input-area">
+                <span class="prompt" style="color:#ff0055;">hack@mainframe:~$</span>
+                <input type="text" id="hackInput" placeholder="Enter hack command...">
+            </div>
+        </div>
+
+        <!-- Sub-Page 3: Matrix Mode (🌧️) -->
+        <div id="matrix-section" class="sub-section">
+            <div class="terminal-window" id="matrixTerminal" style="background:#000; color:#00ff00;">
+                <div class="terminal-line system" style="color:#00ff00;">================================</div>
+                <div class="terminal-line system" style="color:#00ff00;">MATRIX MODE ACTIVATED</div>
+                <div class="terminal-line system" style="color:#00ff00;">================================</div>
+                <div class="terminal-line">Follow the white rabbit...</div>
+                <div class="terminal-line" id="matrixOutput"></div>
+            </div>
+            
+            <div class="command-grid">
+                <div class="command-card" onclick="runMatrixCommand('rabbit')">
+                    <span class="command-key">🐇</span>
+                    <div class="command-desc">White Rabbit</div>
+                </div>
+                <div class="command-card" onclick="runMatrixCommand('pill')">
+                    <span class="command-key">🔴🔵</span>
+                    <div class="command-desc">Red/Blue Pill</div>
+                </div>
+                <div class="command-card" onclick="runMatrixCommand('oracle')">
+                    <span class="command-key">🔮</span>
+                    <div class="command-desc">The Oracle</div>
+                </div>
+                <div class="command-card" onclick="runMatrixCommand('architect')">
+                    <span class="command-key">🏛️</span>
+                    <div class="command-desc">The Architect</div>
+                </div>
+            </div>
+            
+            <div class="progress-bar">
+                <div class="progress-fill" id="matrixProgress" style="width: 0%"></div>
+            </div>
+            
+            <div class="terminal-input-area">
+                <span class="prompt" style="color:#00ff00;">matrix:~$</span>
+                <input type="text" id="matrixInput" placeholder="Enter matrix command...">
+            </div>
+        </div>
+
+        <!-- Sub-Page 4: Command Library (📚) -->
+        <div id="commands-section" class="sub-section">
+            <div class="terminal-window" id="commandsTerminal">
+                <div class="terminal-line system">================================</div>
+                <div class="terminal-line system">COMMAND LIBRARY - ALL AVAILABLE COMMANDS</div>
+                <div class="terminal-line system">================================</div>
+                <div class="terminal-line">Click any command to execute</div>
+                <div class="terminal-line" id="commandsOutput"></div>
+            </div>
+            
+            <div class="command-grid">
+                <div class="command-card" onclick="executeLibraryCommand('help')">
+                    <span class="command-key">help</span>
+                    <div class="command-desc">Show all commands</div>
+                </div>
+                <div class="command-card" onclick="executeLibraryCommand('status')">
+                    <span class="command-key">status</span>
+                    <div class="command-desc">System status</div>
+                </div>
+                <div class="command-card" onclick="executeLibraryCommand('scan')">
+                    <span class="command-key">scan</span>
+                    <div class="command-desc">Network scan</div>
+                </div>
+                <div class="command-card" onclick="executeLibraryCommand('files')">
+                    <span class="command-key">files</span>
+                    <div class="command-desc">List files</div>
+                </div>
+                <div class="command-card" onclick="executeLibraryCommand('date')">
+                    <span class="command-key">date</span>
+                    <div class="command-desc">Show date/time</div>
+                </div>
+                <div class="command-card" onclick="executeLibraryCommand('whoami')">
+                    <span class="command-key">whoami</span>
+                    <div class="command-desc">User info</div>
+                </div>
+                <div class="command-card" onclick="executeLibraryCommand('hack')">
+                    <span class="command-key">hack</span>
+                    <div class="command-desc">Hack sequence</div>
+                </div>
+                <div class="command-card" onclick="executeLibraryCommand('matrix')">
+                    <span class="command-key">matrix</span>
+                    <div class="command-desc">Matrix mode</div>
+                </div>
+            </div>
+            
+            <div class="terminal-input-area">
+                <span class="prompt">library@mainframe:~$</span>
+                <input type="text" id="commandsInput" placeholder="Type or click a command...">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Show different sub-sections
+        function showSubSection(section) {
+            document.querySelectorAll('.sub-section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.sub-nav-btn').forEach(b => b.classList.remove('active'));
+            
+            document.getElementById(section + '-section').classList.add('active');
+            event.target.classList.add('active');
+            
+            if (section === 'matrix') {
+                startMatrixRain();
+            } else {
+                stopMatrixRain();
+            }
+        }
+
+        // ========== BASIC TERMINAL ==========
+        const basicInput = document.getElementById('basicInput');
+        const basicOutput = document.getElementById('basicOutput');
+        const basicTerminal = document.getElementById('basicTerminal');
+
+        basicInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const command = this.value.toLowerCase().trim();
+                
+                // Show command
+                const cmdLine = document.createElement('div');
+                cmdLine.className = 'terminal-line';
+                cmdLine.innerHTML = '<span style="color:#ffff00">$</span> ' + this.value;
+                basicTerminal.insertBefore(cmdLine, basicOutput);
+
+                // Process command
+                const response = document.createElement('div');
+                response.className = 'terminal-line';
+                
+                switch(command) {
+                    case 'help':
+                        response.innerHTML = 'Commands: status, scan, files, network, date, whoami, clear, matrix, hack';
+                        break;
+                    case 'status':
+                        response.innerHTML = 'System: ONLINE | Uptime: 127h | Memory: 7.2GB/16GB | CPU: 34%';
+                        break;
+                    case 'scan':
+                        response.innerHTML = 'Scanning network... Found 3 threats. Use "hack tools" for details.';
+                        break;
+                    case 'files':
+                        response.innerHTML = 'File system: 2.4TB used | 1.2TB free | 1,247 files';
+                        break;
+                    case 'network':
+                        response.innerHTML = 'Network: 12 nodes | 7 active | 3 threats | 2 compromised';
+                        break;
+                    case 'date':
+                        response.innerHTML = new Date().toString();
+                        break;
+                    case 'whoami':
+                        response.innerHTML = 'User: NEO | Clearance: Level 4 | Role: System Operator';
+                        break;
+                    case 'matrix':
+                        response.innerHTML = '🌧️ Entering matrix mode...';
+                        showSubSection('matrix');
+                        break;
+                    case 'hack':
+                        response.innerHTML = '⚡ Switching to hack tools...';
+                        showSubSection('hack');
+                        break;
+                    case 'clear':
+                        while (basicTerminal.children.length > 5) {
+                            basicTerminal.removeChild(basicTerminal.firstChild);
+                        }
+                        this.value = '';
+                        return;
+                    default:
+                        response.className = 'terminal-line error';
+                        response.innerHTML = 'Command not found: ' + command + '. Type "help"';
+                }
+                
+                basicTerminal.insertBefore(response, basicOutput);
+                this.value = '';
+                basicTerminal.scrollTop = basicTerminal.scrollHeight;
+            }
+        });
+
+        // ========== HACK TOOLS ==========
+        function runHackTool(tool) {
+            const terminal = document.getElementById('hackTerminal');
+            const output = document.getElementById('hackOutput');
+            
+            const responses = {
+                'nmap': '🔍 NMAP SCAN: Scanning 192.168.1.0/24... Found 7 hosts. Ports: 22,80,443,3306,8080 open',
+                'crack': '🔓 PASSWORD CRACKER: Brute forcing hash... Progress: 23%. Estimated time: 4h 23m',
+                'exploit': '💥 EXPLOIT DB: Searching vulnerabilities... Found 3 exploits for target system',
+                'sniff': '👁️ PACKET SNIFFER: Capturing traffic... 1,247 packets analyzed. 3 suspicious detected'
+            };
+            
+            const line = document.createElement('div');
+            line.className = 'terminal-line success';
+            line.innerHTML = '> ' + responses[tool];
+            terminal.insertBefore(line, output);
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+
+        const hackInput = document.getElementById('hackInput');
+        hackInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const terminal = document.getElementById('hackTerminal');
+                const output = document.getElementById('hackOutput');
+                
+                const line = document.createElement('div');
+                line.className = 'terminal-line';
+                line.style.color = '#ff0055';
+                line.innerHTML = '<span style="color:#ffff00">hack$</span> ' + this.value;
+                terminal.insertBefore(line, output);
+                
+                const response = document.createElement('div');
+                response.className = 'terminal-line';
+                response.innerHTML = '⚠️ Running hack tool: ' + this.value + '... Access denied. Insufficient privileges.';
+                terminal.insertBefore(response, output);
+                
+                this.value = '';
+                terminal.scrollTop = terminal.scrollHeight;
+            }
+        });
+
+        // ========== MATRIX MODE ==========
+        let matrixInterval;
+        
+        function startMatrixRain() {
+            const terminal = document.getElementById('matrixTerminal');
+            const output = document.getElementById('matrixOutput');
+            const progress = document.getElementById('matrixProgress');
+            
+            let progressValue = 0;
+            matrixInterval = setInterval(() => {
+                if (progressValue < 100) {
+                    progressValue += 1;
+                    progress.style.width = progressValue + '%';
+                    
+                    const line = document.createElement('div');
+                    line.className = 'terminal-line';
+                    line.style.color = '#00ff00';
+                    line.style.opacity = Math.random();
+                    line.textContent = '> ' + Math.random().toString(36).substring(7) + ' ' + Math.random().toString(36).substring(7);
+                    terminal.insertBefore(line, output);
+                    
+                    if (terminal.children.length > 20) {
+                        terminal.removeChild(terminal.children[5]);
+                    }
+                } else {
+                    clearInterval(matrixInterval);
+                    const line = document.createElement('div');
+                    line.className = 'terminal-line success';
+                    line.textContent = '> WAKE UP, NEO... THE MATRIX HAS YOU...';
+                    terminal.insertBefore(line, output);
+                }
+            }, 100);
+        }
+
+        function stopMatrixRain() {
+            if (matrixInterval) {
+                clearInterval(matrixInterval);
+            }
+        }
+
+        function runMatrixCommand(cmd) {
+            const terminal = document.getElementById('matrixTerminal');
+            const output = document.getElementById('matrixOutput');
+            
+            const responses = {
+                'rabbit': '🐇 Follow the white rabbit... Knock knock, Neo.',
+                'pill': '🔴 Red pill - stay in wonderland. 🔵 Blue pill - return to your life.',
+                'oracle': '🔮 The Oracle says: "Know thyself. In here, there is no spoon."',
+                'architect': '🏛️ The Architect: "You are the anomaly. The remainder of an equation."'
+            };
+            
+            const line = document.createElement('div');
+            line.className = 'terminal-line system';
+            line.innerHTML = '> ' + responses[cmd];
+            terminal.insertBefore(line, output);
+        }
+
+        const matrixInput = document.getElementById('matrixInput');
+        matrixInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const terminal = document.getElementById('matrixTerminal');
+                const output = document.getElementById('matrixOutput');
+                
+                const line = document.createElement('div');
+                line.className = 'terminal-line';
+                line.style.color = '#00ff00';
+                line.innerHTML = '<span style="color:#ffff00">matrix$</span> ' + this.value;
+                terminal.insertBefore(line, output);
+                
+                this.value = '';
+            }
+        });
+
+        // ========== COMMAND LIBRARY ==========
+        function executeLibraryCommand(cmd) {
+            const terminal = document.getElementById('commandsTerminal');
+            const output = document.getElementById('commandsOutput');
+            
+            const responses = {
+                'help': '📚 Available commands: status, scan, files, network, date, whoami, hack, matrix, clear',
+                'status': '📊 SYSTEM STATUS: Online | Uptime: 127h | Memory: 7.2/16GB | CPU: 34%',
+                'scan': '🔍 NETWORK SCAN: 12 nodes found. 7 active, 3 offline, 2 compromised',
+                'files': '📁 FILE SYSTEM: 2.4TB used. Last file: neural_core.dat (2.4GB)',
+                'date': '📅 ' + new Date().toString(),
+                'whoami': '👤 USER: NEO | Level 4 | Last login: ' + new Date().toLocaleTimeString(),
+                'hack': '⚠️ HACK SEQUENCE: Requires hack tools module. Click HACK TOOLS tab',
+                'matrix': '🌧️ MATRIX MODE: Click MATRIX MODE tab for full experience'
+            };
+            
+            const line = document.createElement('div');
+            line.className = 'terminal-line success';
+            line.innerHTML = '> ' + responses[cmd];
+            terminal.insertBefore(line, output);
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+
+        const commandsInput = document.getElementById('commandsInput');
+        commandsInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                executeLibraryCommand(this.value.toLowerCase().trim());
+                this.value = '';
+            }
+        });
+
+        // Get username from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const username = urlParams.get('user') || 'NEO';
+        document.getElementById('display-username').textContent = username;
+    </script>
+</body>
+</html>
